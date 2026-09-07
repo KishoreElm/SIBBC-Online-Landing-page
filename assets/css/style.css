@@ -887,7 +887,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
 }
 .learn__head:has(.learn__figure) {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);   /* 60 / 40 */
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);   /* 60 / 40 */
   gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
 }
@@ -900,9 +900,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   /* border: 1px solid var(--rule); */
   /* box-shadow: var(--shadow); */
 }
-.learn__figure img {
+.learn__figure iframe {
   width: 100%;
-  height: auto;
+  height: 350px;
   display: block;
 
 }
