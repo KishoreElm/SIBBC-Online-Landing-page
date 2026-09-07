@@ -57,6 +57,7 @@
   --r: 4px;
   --r-lg: 12px;
   --shadow: 0 1px 2px rgba(10, 33, 73, 0.06), 0 12px 32px -12px rgba(10, 33, 73, 0.16);
+  --shadow-lift: 0 20px 44px -20px rgba(10, 33, 73, 0.4);
 
   --fs-eyebrow: 0.72rem;
   --fs-h1: clamp(2.4rem, 1.55rem + 3.7vw, 4.15rem);
@@ -119,6 +120,9 @@ a { color: inherit; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.12; letter-spacing: -0.01em; text-wrap: balance; }
 
 .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
   font-family: var(--font-mono);
   font-size: var(--fs-eyebrow);
   font-weight: 500;
@@ -126,7 +130,20 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   text-transform: uppercase;
   color: var(--gold-600);
   margin-bottom: 1.15rem;
+  margin-top: 1.15rem;
 }
+/* the little rule draws itself in when the label scrolls into view */
+.eyebrow::before {
+  content: "";
+  flex: none;
+  inline-size: 1.6rem;
+  block-size: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+.eyebrow.is-visible::before { transform: scaleX(1); }
 .eyebrow--onDark { color: var(--gold-soft); }
 
 .section__title {
@@ -330,20 +347,147 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
 
 .hero .eyebrow { margin-bottom: 1rem; }
 
-.hero__banner {
+/* Visible headline for tablet / phone, where the banner artwork is too
+   small to read. Hidden on desktop — the banner carries the message there. */
+.hero__headline { display: none; }
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 1.35rem + 2.8vw, 2.55rem);
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+  text-wrap: balance;
+}
+.hero__sub {
+  margin-top: 0.8rem;
+  font-family: var(--font-script);
+  font-size: clamp(1.02rem, 0.9rem + 1vw, 1.3rem);
+  line-height: 1.4;
+  color: var(--gold-soft);
+}
+
+/* ---- hero banner carousel ---- */
+.hero__carousel {
+  --slide-ratio: 3000 / 1485;   /* shape of the banners */
+  position: relative;
   margin: 0 0 2rem;
   border-radius: var(--r-lg);
   overflow: hidden;
   border: 1px solid var(--cream-rule);
   box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
 }
-.hero__banner img {
+.hero__carousel__viewport { overflow: hidden; }
+.hero__carousel__track {
+  display: flex;
+  list-style: none;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hero__carousel__track.is-instant { transition: none; }
+.hero__carousel__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+.hero__carousel__slide img {
   width: 100%;
   height: auto;
   display: block;
+  aspect-ratio: var(--slide-ratio);
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 7s linear;
+}
+/* the active slide drifts in a slow, subtle zoom */
+.hero__carousel__slide[aria-hidden="false"] img { transform: scale(1.045); }
+
+.hero__carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 20%;
+  background: rgba(139, 157, 193, 0.55);
+  color: var(--cream);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.hero__carousel__arrow:hover { background: var(--gold); color: var(--navy-900); }
+.hero__carousel__arrow--prev { left: 0.75rem; }
+.hero__carousel__arrow--next { right: 0.75rem; }
+
+.hero__carousel__toggle {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(7, 22, 52, 0.55);
+  color: var(--cream);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.hero__carousel__toggle::before,
+.hero__carousel__toggle::after {
+  content: "";
+  width: 3px;
+  height: 12px;
+  background: currentColor;   /* two bars = pause */
+}
+.hero__carousel__toggle[aria-pressed="true"]::after { display: none; }
+.hero__carousel__toggle[aria-pressed="true"]::before {
+  width: 0;
+  height: 0;
+  background: transparent;
+  border-left: 11px solid currentColor;   /* triangle = play */
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  margin-left: 2px;
 }
 
-.hero__actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 3rem; }
+.hero__carousel__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 0.8rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+}
+.hero__carousel__dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(244, 239, 228, 0.4);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.hero__carousel__dot[aria-current="true"] {
+  background: var(--gold);
+  transform: scale(1.3);
+}
+
+/* single banner — controls hidden by the script */
+.hero__carousel[data-single] .hero__carousel__arrow,
+.hero__carousel[data-single] .hero__carousel__toggle,
+.hero__carousel[data-single] .hero__carousel__dots { display: none; }
+
+.hero__actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 1rem; }
 
 /* ---------- 7b. Countdown ---------- */
 .countdown {
@@ -525,6 +669,42 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
 }
 
 /* ---------- 8. Program / cards ---------- */
+.program__head {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);   /* 60 / 40 */
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+  margin-bottom: clamp(2.75rem, 6vw, 4rem);
+}
+.program__text .section__intro { margin-bottom: 0; }
+.program__figure {
+  margin: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+}
+.program__figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* every section figure settles out of a soft zoom as it scrolls in
+   (only when JS has armed the reveal — [data-reveal] is JS-added) */
+.program__figure,
+.pathway__figure,
+.learn__figure { overflow: hidden; }
+.program__figure[data-reveal] img,
+.pathway__figure[data-reveal] img,
+.learn__figure[data-reveal] img {
+  transform: scale(1.08);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.program__figure.is-visible img,
+.pathway__figure.is-visible img,
+.learn__figure.is-visible img { transform: none; }
+
 .cards {
   list-style: none;
   display: grid;
@@ -553,6 +733,27 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
 
 /* ---------- 9. Pathway (signature) ---------- */
 .pathway .wrap { position: relative; }
+
+.pathway__head {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);   /* 60 / 40 */
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+  margin-bottom: clamp(2.5rem, 6vw, 3.75rem);
+}
+.pathway__text .section__intro { margin-bottom: 0; }
+.pathway__figure {
+  margin: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--cream-rule);
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
+}
+.pathway__figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 
 .spine {
   list-style: none;
@@ -681,6 +882,31 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
 .pathway__foot { margin-top: 2.5rem; padding-left: 0; }
 
 /* ---------- 10. How you'll learn ---------- */
+.learn__head {
+  margin-bottom: clamp(2.5rem, 6vw, 3.75rem);
+}
+.learn__head:has(.learn__figure) {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);   /* 60 / 40 */
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+.learn__text .section__intro { margin-bottom: 0; }
+.learn__figure {
+  margin: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  /* background: var(--cream-softer); */
+  /* border: 1px solid var(--rule); */
+  /* box-shadow: var(--shadow); */
+}
+.learn__figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+
+}
+
 .learn {
   list-style: none;
   display: grid;
@@ -1024,57 +1250,143 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* scroll-reveal — JS tags blocks with [data-reveal]; grouped children
+   get a --reveal-delay so they cascade in one after another */
 [data-reveal] {
   opacity: 0;
   transform: translateY(22px);
-  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
 }
 [data-reveal].is-visible { opacity: 1; transform: none; }
 
-/* ---------- 17. Responsive ---------- */
-@media (max-width: 1024px) {
-  .cards { grid-template-columns: repeat(2, 1fr); }
-  .factstrip { grid-template-columns: repeat(2, 1fr); }
+/* header drops in on first load */
+@keyframes navDrop {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
 }
+.nav { animation: navDrop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-@media (max-width: 780px) {
-  .fac,
-  .fac:nth-child(even) {
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
+/* smooth accordion open/close where the browser supports it
+   (progressive enhancement — elsewhere <details> just snaps as before) */
+@supports (interpolate-size: allow-keywords) {
+  :root { interpolate-size: allow-keywords; }
+  .faq__item::details-content,
+  .stage__body::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition: block-size 0.34s cubic-bezier(0.22, 1, 0.36, 1), content-visibility 0.34s allow-discrete;
   }
-  .fac__portrait,
-  .fac:nth-child(even) .fac__portrait { flex: none; width: min(320px, 84%); align-items: center; }
-  .fac__body { width: 100%; max-width: 460px; transform: none; }
-  .fac__outline,
-  .fac:nth-child(even) .fac__outline { transform: scale(1.17) translate(0, -6%); }   /* centre + drop parallax drift */
-  .fac__module { min-height: 0; }
+  .faq__item[open]::details-content,
+  .stage__body[open]::details-content { block-size: auto; }
 }
 
-@media (max-width: 880px) {
+/* ---------- 16b. Hover polish (pointer devices only) ---------- */
+@media (hover: hover) {
+  .card,
+  .learn__item,
+  .spec {
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
+  }
+  .card:hover,
+  .learn__item:hover,
+  .spec:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+  .module { transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease; }
+  .module:hover { transform: translateY(-3px); border-color: var(--gold-soft); }
+}
+
+/* ---------- 17. Responsive ---------- */
+/* Desktop layout is the baseline above. Each step below only *adjusts*
+   it for a narrower screen — nothing here changes the desktop view.
+   Breakpoints: 1024 · 900 (tablet) · 780 · 600 (phone) · 400 · 380     */
+
+/* — small desktop / large tablet — */
+@media (max-width: 1024px) {
+  .cards          { grid-template-columns: repeat(2, 1fr); }
+  .factstrip      { grid-template-columns: repeat(2, 1fr); }
+  .learn          { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* — tablet: split layouts go single-column, nav collapses to the button — */
+@media (max-width: 900px) {
   .nav__links, .nav__cta { display: none; }
   .nav__toggle { display: block; }
   .nav__mobile[data-open] { display: flex; }
 
-  .wrap--split { grid-template-columns: 1fr; }
+  .hero__headline { display: block; margin-bottom: 1.75rem; }
 
-  .learn { grid-template-columns: 1fr; }
-  .stage__modules { grid-template-columns: 1fr; }
+  .wrap--split { grid-template-columns: 1fr; gap: clamp(2rem, 5vw, 3rem); }
+  .wrap--split .section__intro { margin-bottom: 1.5rem; }
+
+  .program__head,
+  .pathway__head,
+  .learn__head:has(.learn__figure) {
+    grid-template-columns: 1fr;
+    gap: clamp(1.75rem, 5vw, 2.5rem);
+  }
+  .program__figure,
+  .pathway__figure { max-width: 460px; margin-inline: auto; }
+  .learn__figure   { max-width: 620px; margin-inline: auto; }
 }
 
-@media (max-width: 560px) {
-  .cards { grid-template-columns: 1fr; }
-  .factstrip { grid-template-columns: 1fr; }
-  .hero__actions .btn { flex: 1 1 100%; }
+/* — large phone: modules go single-column, faculty rows stack — */
+@media (max-width: 780px) {
+  .stage__modules { grid-template-columns: 1fr; }
 
+  .fac,
+  .fac:nth-child(even) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .fac__portrait,
+  .fac:nth-child(even) .fac__portrait {
+    flex: none;
+    width: min(320px, 84%);
+    align-items: flex-start;
+  }
+  .fac__body {
+    width: 100%;
+    max-width: none;
+    padding-top: 0;
+    transform: none;
+  }
+  .fac__outline,
+  .fac:nth-child(even) .fac__outline { transform: scale(1.12) translate(0, -3%); }
+  .fac__portrait figcaption { max-width: none; text-align: left; align-items: flex-start; }
+  .fac__module { min-height: 0; }
+}
+
+/* — phone — */
+@media (max-width: 640px) {
+  .cards, .learn { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .hero__carousel__arrow { display: none; }   /* keep swipe + dots */
+
+  .hero__actions .btn,
+  .enrol__actions .btn { flex: 1 1 100%; }
+  .hero__actions, .enrol__actions { width: 100%; }
   .countdown__inner .btn { width: 100%; max-width: 22rem; }
   .flip__label { letter-spacing: 0.08em; }
 
-  .enrol__actions .btn { flex: 1 1 100%; }
-  .hero__actions, .enrol__actions { width: 100%; }
+  .section__intro { line-height: 1.55; }
 
-  .nav__logo { height: 40px; }
+  .nav__inner { gap: 1rem; }
+  .nav__logo  { height: 38px; }
+
+  .factstrip > div { padding: 0.95rem 1rem; }
+  .factstrip dt { font-size: 0.68rem; letter-spacing: 0.12em; margin-bottom: 0.3rem; }
+  .factstrip dd { font-size: 0.98rem; }
+
+  .spec { padding: 1.5rem 1.35rem; }
+  .spec__feesList { flex-wrap: wrap; gap: 0.5rem 1.25rem; }
 
   .spine::before { left: 19px; }
   .stage { grid-template-columns: 40px minmax(0, 1fr); gap: 0.25rem 1rem; }
@@ -1083,7 +1395,13 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   .stage__summary { grid-template-columns: 1fr; }
   .stage__hint { grid-row: auto; grid-column: 1; padding-right: 1.5rem; }
 
+  .footer__inner { gap: 1.5rem; }
   .footer__legal { flex-direction: column; }
+}
+
+/* — small phone — */
+@media (max-width: 400px) {
+  .factstrip { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 380px) {
@@ -1100,4 +1418,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   }
   [data-reveal] { opacity: 1; transform: none; }
   .spine::before { transform: scaleY(1); }
+  .eyebrow::before { transform: none; }
+  .program__figure img,
+  .pathway__figure img,
+  .learn__figure img,
+  .hero__carousel__slide img { transform: none !important; }
 }

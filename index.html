@@ -46,7 +46,7 @@
       <a href="#faculty">Faculty</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a href="#enrol" class="btn btn--gold nav__cta">Register</a>
+    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold nav__cta" data-register>Register</a>
     <button class="nav__toggle" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
@@ -59,7 +59,7 @@
     <a href="#faculty">Faculty</a>
     <a href="#enrol">Enrolment &amp; fees</a>
     <a href="#faq">FAQ</a>
-    <a href="#enrol" class="btn btn--gold">Register now</a>
+    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold" data-register>Register now</a>
   </div>
 </header>
 
@@ -68,37 +68,63 @@
 
 <!-- ============================ HERO ============================ -->
 <section class="hero" aria-label="Certificate in Advanced Christian Apologetics — Online Programs">
-  <div class="hero__inner">
+  <div class="hero__inner" data-stagger>
     <h1 class="visually-hidden">
       Certificate in Advanced Christian Apologetics — Online Programs from
       South India Baptist Bible College &amp; Seminary
     </h1>
-    <p class="eyebrow eyebrow--onDark">Enrolling now &nbsp;·&nbsp; October 2026 cohort</p>
-    <figure class="hero__banner">
-      <img src="assets/img/hero-banner.jpg" width="3000" height="1485"
-        alt="Certificate in Advanced Christian Apologetics. Know what you believe. Know why you defend it.
-             Faculty: Dr. William J. Subash, Pastor, Teacher and Seminary Professor; Prof. Karthik R, Faculty and Pastor;
-             Pr. RajKumar Richard, Christian Apologist; Mr Asher John, Co-founder of The Carpenter's Desk.
-             Key learning points: Biblical Foundations and Apologetic Methodology; Philosophical Foundations of Christian Theism;
-             Historical, Evidential, and Cultural Apologetics; Science, Technology, and Contemporary Christian Engagement.">
-    </figure>
-    <div class="hero__actions">
-      <a href="#enrol" class="btn btn--gold btn--lg">Register now</a>
-      <a href="#pathway" class="btn btn--ghost btn--lg">See the curriculum</a>
+    <div class="hero__headline" aria-hidden="true">
+      <p class="hero__title">Certificate in Advanced Christian Apologetics</p>
+      <p class="hero__sub">Know what you believe. Know why you defend it.</p>
     </div>
-    <dl class="factstrip">
+    <!--
+      HERO CAROUSEL
+      Right now only banner-1.jpg exists, so this shows as a single static banner.
+      Drop banner-2.jpg (and banner-3.jpg, …) into assets/img/hero/ — same ~2:1 shape —
+      and it becomes a rotating carousel with arrows + dots automatically. No code
+      change needed: a slide whose image is missing removes itself on load.
+      To go past 3 banners, add another <li class="hero__carousel__slide"> here.
+    -->
+    <div class="hero__carousel" data-carousel aria-roledescription="carousel" aria-label="Program highlights">
+      <div class="hero__carousel__viewport">
+        <ul class="hero__carousel__track" data-carousel-track>
+          <li class="hero__carousel__slide">
+            <img src="assets/img/hero/banner-1.jpg" width="3000" height="1485" loading="eager"
+              alt="Certificate in Advanced Christian Apologetics — know what you believe, know why you defend it. Faculty: Dr. William J. Subash, Prof. Karthik R, Pr. RajKumar Richard, Mr Asher John. Key learning points: biblical foundations and apologetic methodology; philosophical foundations of Christian theism; historical, evidential and cultural apologetics; science, technology and contemporary Christian engagement.">
+          </li>
+          <li class="hero__carousel__slide">
+            <img src="assets/img/hero/banner-2.jpg" width="3000" height="1485" loading="eager"
+              alt="Certificate in Advanced Christian Apologetics — session information and key topics." onerror="this.closest('li').remove()">
+          </li>
+          <li class="hero__carousel__slide">
+            <img src="assets/img/hero/banner-3.jpg" width="3000" height="1485" loading="eager"
+              alt="Certificate in Advanced Christian Apologetics — meet the faculty." onerror="this.closest('li').remove()">
+          </li>
+        </ul>
+      </div>
+      <button class="hero__carousel__arrow hero__carousel__arrow--prev" type="button" data-carousel-prev aria-label="Previous banner">&#8249;</button>
+      <button class="hero__carousel__arrow hero__carousel__arrow--next" type="button" data-carousel-next aria-label="Next banner">&#8250;</button>
+      <!-- <button class="hero__carousel__toggle" type="button" data-carousel-toggle aria-label="Pause banner rotation" aria-pressed="false"></button> -->
+      <div class="hero__carousel__dots" data-carousel-dots role="tablist" aria-label="Choose a banner"></div>
+    </div>
+        <dl class="factstrip">
       <div><dt>Starts</dt><dd>5 October 2026</dd></div>
       <div><dt>Format</dt><dd>Live on Zoom + Google Classroom</dd></div>
       <div><dt>Schedule</dt><dd>Mon &amp; Fri · 7:30–9:30 PM IST</dd></div>
       <div><dt>Length</dt><dd>6 months · 24 weeks · 12 modules</dd></div>
     </dl>
+    <p class="eyebrow eyebrow--onDark">Enrolling now &nbsp;·&nbsp; October 2026 cohort</p>
+    <div class="hero__actions">
+      <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold btn--lg" data-register>Register now</a>
+      <a href="#pathway" class="btn btn--ghost btn--lg">See the curriculum</a>
+    </div>
   </div>
 </section>
 
 <!-- ============================ COUNTDOWN ============================ -->
 <section class="countdown" aria-labelledby="countdown-title"
          data-countdown="2026-10-05T19:30:00+05:30">
-  <div class="countdown__inner">
+  <div class="countdown__inner" data-stagger>
     <p class="eyebrow eyebrow--onDark">Live classes begin 5 October 2026 · 7:30 PM IST</p>
     <h2 id="countdown-title" class="countdown__title">The countdown to the first session</h2>
 
@@ -147,25 +173,33 @@
     <p class="countdown__done" data-countdown-done hidden>
       The October 2026 cohort has begun. Contact the seminary office about the next intake.
     </p>
-    <a href="#enrol" class="btn btn--gold" data-countdown-cta>Register now</a>
+    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold" data-countdown-cta>Register now</a>
   </div>
 </section>
 
 <!-- ============================ PROGRAM / WHY ============================ -->
 <section class="section section--paper" id="program" aria-labelledby="program-title">
   <div class="wrap">
-    <p class="eyebrow">The program</p>
-    <h2 id="program-title" class="section__title">Not a study group — a systematic education in defending the faith</h2>
-    <p class="section__intro">
-      Twelve sequential modules build progressively on one another. You begin with the
-      scriptural basis for apologetics and its methods, move through epistemology,
-      metaphysics, and natural theology, examine the historical reliability of Scripture and
-      the resurrection, and finish with science, origins, and emerging technology. The result
-      is one coherent framework — biblical conviction, logical reasoning, historical
-      awareness, and Christlike character held together.
-    </p>
+    <div class="program__head">
+      <div class="program__text">
+        <p class="eyebrow">The program</p>
+        <h2 id="program-title" class="section__title">Not a study group — a systematic education in defending the faith</h2>
+        <p class="section__intro">
+          Twelve sequential modules build progressively on one another. You begin with the
+          scriptural basis for apologetics and its methods, move through epistemology,
+          metaphysics, and natural theology, examine the historical reliability of Scripture and
+          the resurrection, and finish with science, origins, and emerging technology. The result
+          is one coherent framework — biblical conviction, logical reasoning, historical
+          awareness, and Christlike character held together.
+        </p>
+      </div>
+      <figure class="program__figure">
+        <img src="assets/img/program/poster.jpg" width="1080" height="1350" loading="lazy"
+          alt="Certificate in Advanced Christian Apologetics — defending Christian faith in today's intellectual and cultural environment. Key learning points: biblical foundations and apologetic methodology; philosophical foundations of Christian theism; historical, evidential and cultural apologetics; science, technology and contemporary Christian engagement. Live 7:30–9:30 PM on Mondays from 5 October 2026, over 6 months (24 weeks).">
+      </figure>
+    </div>
 
-    <ul class="cards" role="list">
+    <ul class="cards" role="list" data-stagger>
       <li class="card">
         <p class="card__kicker">Rigorous, not casual</p>
         <h3 class="card__title">An academic curriculum</h3>
@@ -197,13 +231,21 @@
 <!-- ============================ PATHWAY (SIGNATURE) ============================ -->
 <section class="section section--navy pathway" id="pathway" aria-labelledby="pathway-title">
   <div class="wrap">
-    <p class="eyebrow eyebrow--onDark">The curriculum</p>
-    <h2 id="pathway-title" class="section__title section__title--onDark">A path that builds, stage by stage</h2>
-    <p class="section__intro section__intro--onDark">
-      Four stages, twelve modules, two weeks each. Every stage assumes the one before it —
-      by Stage&nbsp;IV you are integrating philosophy, history, and science into a single
-      cumulative case. Open a stage to see its modules.
-    </p>
+    <div class="pathway__head">
+      <div class="pathway__text">
+        <p class="eyebrow eyebrow--onDark">The curriculum</p>
+        <h2 id="pathway-title" class="section__title section__title--onDark">A path that builds, stage by stage</h2>
+        <p class="section__intro section__intro--onDark">
+          Four stages, twelve modules, two weeks each. Every stage assumes the one before it —
+          by Stage&nbsp;IV you are integrating philosophy, history, and science into a single
+          cumulative case. Open a stage to see its modules.
+        </p>
+      </div>
+      <figure class="pathway__figure">
+        <img src="assets/img/pathway/poster.jpg" width="1080" height="1350" loading="lazy"
+          alt="Certificate in Advanced Christian Apologetics — know what you believe, know why you defend it. Key topics: biblical foundations and apologetic methodology; philosophical foundations of Christian theism; historical, evidential and cultural apologetics; science, AI and contemporary Christian engagement.">
+      </figure>
+    </div>
 
     <ol class="spine" data-spine>
 
@@ -344,14 +386,28 @@
 <!-- ============================ HOW YOU'LL LEARN ============================ -->
 <section class="section section--paper" id="learning" aria-labelledby="learning-title">
   <div class="wrap">
-    <p class="eyebrow">How it works</p>
-    <h2 id="learning-title" class="section__title">Three ways you learn at once</h2>
-    <p class="section__intro">
-      The program is built for holistic growth — you are taught directly, you test ideas with
-      peers, and you study on your own, every week.
-    </p>
+    <div class="learn__head">
+      <div class="learn__text">
+        <p class="eyebrow">How it works</p>
+        <h2 id="learning-title" class="section__title">Three ways you learn at once</h2>
+        <p class="section__intro">
+          The program is built for holistic growth — you are taught directly, you test ideas with
+          peers, and you study on your own, every week.
+        </p>
+      </div>
+      <figure class="learn__figure">
+        <!--
+          Drop the real illustration in as assets/img/learning/illustration.svg
+          (or .png / .jpg / .jpeg / .webp) — main.js finds it and swaps it in.
+          Until then this placeholder shows. Landscape shape works best.
+        -->
+        <img src="assets/img/learning/download.png" width="960" height="680" loading="lazy"
+          alt="Three ways to learn: a live online class, a peer discussion thread, and an open book for self-study."
+          data-learn-illustration>
+      </figure>
+    </div>
 
-    <ol class="learn" role="list">
+    <ol class="learn" role="list" data-stagger>
       <li class="learn__item">
         <p class="learn__num">01</p>
         <h3>Direct instructor learning</h3>
@@ -392,7 +448,7 @@
         articulate ambassador — able to teach it, mentor others in it, and hold it in public.
       </p>
     </div>
-    <ul class="outcomes" role="list">
+    <ul class="outcomes" role="list" data-stagger>
       <li>Explain the biblical basis and historical development of Christian apologetics.</li>
       <li>Apply sound methodology, logic, and critical thinking to real objections.</li>
       <li>Evaluate philosophical arguments about God, truth, knowledge, and human existence.</li>
@@ -413,7 +469,7 @@
       defend the faith through to the frontiers of science and technology.
     </p>
 
-    <ul class="faculty" role="list" >
+    <ul class="faculty" role="list" data-stagger>
 
       <li class="fac">
         <figure class="fac__portrait">
@@ -427,7 +483,7 @@
           </figcaption>
         </figure>
         <div class="fac__body" data-parallax="-10">
-          <p class="fac__badge">Stage 1 · Weeks 1–4</p>
+          <p class="fac__badge">Module - 1</p>
           <h3 class="fac__module">Biblical Foundations &amp; Apologetic Methodology</h3>
           <ul class="fac__topics" role="list">
             <li>Biblical foundations of Christian apologetics</li>
@@ -450,7 +506,7 @@
           </figcaption>
         </figure>
         <div class="fac__body" data-parallax="-10">
-          <p class="fac__badge">Stage 2 · Weeks 5–12</p>
+          <p class="fac__badge">Module - 2</p>
           <h3 class="fac__module">Philosophical Foundations of Christian Theism</h3>
           <ul class="fac__topics" role="list">
             <li>Worldviews and Christian epistemology</li>
@@ -473,7 +529,7 @@
           </figcaption>
         </figure>
         <div class="fac__body" data-parallax="-10">
-          <p class="fac__badge">Stage 3 · Weeks 13–20</p>
+          <p class="fac__badge">Module - 3</p>
           <h3 class="fac__module">Historical, Evidential &amp; Cultural Apologetics</h3>
           <ul class="fac__topics" role="list">
             <li>Revelation and Scripture</li>
@@ -496,7 +552,7 @@
           </figcaption>
         </figure>
         <div class="fac__body" data-parallax="-10">
-          <p class="fac__badge">Stage 4 · Weeks 21–24</p>
+          <p class="fac__badge">Module - 4</p>
           <h3 class="fac__module">Science, Technology &amp; Contemporary Engagement</h3>
           <ul class="fac__topics" role="list">
             <li>Science and the Christian faith</li>
@@ -522,8 +578,8 @@
         office will confirm your place and share the payment schedule.
       </p>
       <div class="enrol__actions">
-        <!-- Registration form link is set in assets/js/main.js (REGISTER_URL) -->
-        <a href="https://wa.me/916380873580" class="btn btn--gold btn--lg" data-register>Open the registration form</a>
+        <!-- Registration form URL: keep this in sync with REGISTER_URL in assets/js/main.js -->
+        <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold btn--lg" data-register>Open the registration form</a>
         <a href="https://wa.me/916380873580" class="btn btn--ink btn--lg" target="_blank" rel="noopener">Ask on WhatsApp</a>
       </div>
       <p class="enrol__contact">
@@ -534,7 +590,7 @@
 
     <div class="spec">
       <p class="spec__head">At a glance</p>
-      <dl class="spec__list">
+      <dl class="spec__list" data-stagger>
         <div><dt>Start date</dt><dd>5 October 2026</dd></div>
         <div><dt>Duration</dt><dd>6 months · 24 weeks</dd></div>
         <div><dt>Structure</dt><dd>12 modules · 2 weeks each</dd></div>
@@ -561,7 +617,7 @@
     <p class="eyebrow">Questions</p>
     <h2 id="faq-title" class="section__title">Frequently asked</h2>
 
-    <div class="faq">
+    <div class="faq" data-stagger>
       <details class="faq__item">
         <summary>How is this different from a typical Sunday school class?</summary>
         <div class="faq__answer"><p>
@@ -662,7 +718,7 @@
   <div class="wrap wrap--narrow closer__inner">
     <h2 id="closer-title">Begin the October 2026 cohort</h2>
     <p>Six months. Twelve modules. One coherent defence of the faith.</p>
-    <a href="https://wa.me/916380873580" class="btn btn--gold btn--lg" data-register>Register now</a>
+    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold btn--lg" data-register>Register now</a>
   </div>
 </section>
 
@@ -670,7 +726,7 @@
 
 <!-- ============================ FOOTER ============================ -->
 <footer class="footer">
-  <div class="wrap footer__inner">
+  <div class="wrap footer__inner" data-stagger>
     <div class="footer__brand">
       <img src="assets/img/seal.png" alt="" class="footer__seal">
       <div>

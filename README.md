@@ -17,7 +17,11 @@ assets/
   img/
     logo.png                    header logo (South India … Online Programs lockup)
     seal.png                    favicon + footer seal
-    hero-banner.jpg             the promotional poster shown in the hero
+    hero/                       the hero banner carousel images (banner-1.jpg, …)
+    program/poster.jpg          the poster beside "The program" text (~4:5 portrait)
+    pathway/poster.jpg          the poster beside "The curriculum" text (~4:5 portrait)
+    learning/                   the image beside "How it works" text (drop in
+                                illustration.svg / .png / .jpg; placeholder ships)
     faculty/                    the four faculty cut-out portraits
   program-overview.pdf          linked from the Curriculum section and footer
 .claude/                        local-preview helper (not needed for deployment)
@@ -32,15 +36,12 @@ folder (you can leave out `.claude/` and `README.md`).
 
 ### 1. The registration link
 
-Open `assets/js/main.js` and set **one line** at the top:
+Every **Register** / **Open the registration form** button points to the Google Form
+`https://forms.gle/biuxaGiAj6wjfLG29` and opens in a new tab.
 
-```js
-var REGISTER_URL = "https://your-form-link";   // Fillout, Google Form, Zoho, etc.
-```
-
-Every **Register** / **Open the registration form** button then points there and
-opens in a new tab. Until you set it, those buttons open WhatsApp
-(`wa.me/916380873580`) as a fallback.
+To change it, update it in **two** places so it also works with JavaScript off:
+1. `REGISTER_URL` near the top of `assets/js/main.js`
+2. every `href="https://forms.gle/…"` in `index.html` (find-and-replace)
 
 ### 2. Faculty photos and teaching assignments
 
@@ -88,10 +89,15 @@ No server-side code is required.
 
 ## Editing content
 
-- **Hero banner**: replace `assets/img/hero-banner.jpg` (keep it wide — about 2:1 —
-  and 1600–2000 px across). The `<img>` alt text in `index.html` carries the same
-  information for search engines and screen readers, so update it to match a new
-  poster.
+- **Hero banner carousel**: banners live in `assets/img/hero/` as `banner-1.jpg`,
+  `banner-2.jpg`, `banner-3.jpg`. Keep them the same wide shape (~2:1, 1600–2400 px
+  across). With one image it shows as a static banner; add a second and it becomes a
+  rotating carousel — arrows, dots, a pause button, auto-advance every 6 s, swipe on
+  touch. No code change needed: a missing `banner-*.jpg` slide removes itself on load.
+  For a 4th+ banner, copy a `<li class="hero__carousel__slide">` in `index.html`.
+  Auto-advance is off for reduced-motion visitors, and pauses on hover/focus, when
+  the tab is hidden, and when the hero scrolls out of view. Update each slide's
+  `alt` text to describe that poster.
 - **Countdown timer**: a split-flap "flip clock" — the digits flip like cards when
   they change. The target is one attribute on the `<section class="countdown"
   data-countdown="2026-10-05T19:30:00+05:30">` in `index.html`. It is ISO 8601 with
@@ -108,6 +114,16 @@ No server-side code is required.
   with scroll and the text counter-drifts — a **parallax** effect; tune it with the
   `data-parallax` attribute on `.fac__outline` (`"26"`) and `.fac__body` (`"-10"`).
   Parallax is off on phones and for reduced-motion visitors.
+- **Section posters**: "The program" and "The curriculum" each open with a 60% text /
+  40% poster row (`assets/img/program/poster.jpg` and `assets/img/pathway/poster.jpg`).
+  Replace those files to swap the images — keep them portrait (~4:5). They drop below
+  the text on screens under 880 px. Update each `<img alt>` to match a new poster.
+- **"How it works" illustration**: the same 60/40 row. It ships with a placeholder,
+  `assets/img/learning/illustration-placeholder.svg` (a brand-matched line drawing —
+  live-class window, discussion thread, open book). To use your own, just save it as
+  `assets/img/learning/illustration.svg` — or `.png`, `.jpg`, `.jpeg`, `.webp`. No
+  code change: `main.js` checks for those five names and swaps in the first one it
+  finds, otherwise the placeholder stays. Landscape shape works best.
 - **Curriculum** (the 4-stage "path"): each stage is a `<details>` block inside
   `.spine` in `index.html`. Stage I is open by default (`<details ... open>`).
 - **FAQ**: each question is a `<details class="faq__item">` in the FAQ section.
@@ -120,15 +136,29 @@ No server-side code is required.
 
 ---
 
-## Accessibility & behaviour
+## Responsive & motion
 
-- Responsive from ~320 px to large desktop; layout breakpoints at 1024 / 880 / 560 px.
+- **Desktop is the baseline.** Section 17 of `style.css` only *adjusts* it downward —
+  breakpoints at **1024 · 900 · 780 · 640 · 600 · 400 · 380 px**. Nothing in those
+  blocks changes the desktop view.
+  - `≤ 900` — nav collapses to the menu button; the split / 60-40 layouts stack;
+    a **visible hero headline + tagline** appears (`.hero__headline` in `index.html`)
+    because the banner artwork is too small to read on a phone. It is hidden again on
+    desktop, where the banner carries the message. Edit that text in `index.html`.
+  - `≤ 780` — faculty rows stack and left-align.
+  - `≤ 600` — carousel arrows hide (swipe + dots stay); primary buttons go full-width.
+- **Motion.** Scroll-reveal fades every block up as it enters view; grids
+  (cards, faculty, FAQ, fact list…) carry a `data-stagger` attribute so their
+  children cascade in one after another. Also: the header drops in on load, section
+  labels draw their little rule, cards lift on hover, section photos settle out of a
+  soft zoom, the active banner slowly pans, `<details>` panels animate open where the
+  browser supports it. Everything is off under `prefers-reduced-motion`.
 - Keyboard accessible, visible focus outlines, skip link.
 - Smooth scrolling via **Lenis** (self-hosted in `assets/vendor/lenis/`, no CDN, no
   build step). It also smooths the in-page `#` links. If the script fails to load
   the page still scrolls normally.
-- Respects `prefers-reduced-motion` (turns off smooth scroll, scroll reveals, and
-  the spine draw).
+- Respects `prefers-reduced-motion` (turns off smooth scroll, every reveal / stagger /
+  hover animation, the spine draw, and the banner pan).
 - Fonts load from Google Fonts: **Poppins** (headings + body), **IBM Plex Mono**
   (eyebrows, badges, the countdown digits, module codes), and **Playwrite DE Grund**
   — a handwriting script used as an accent on the countdown headline and the closing

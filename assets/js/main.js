@@ -22,15 +22,16 @@
 
   /* -----------------------------------------------------------
      1. Registration link  —  EDIT THIS ONE LINE
-     Paste the URL of your registration form (Fillout, Google Form,
-     Zoho, etc.). Every "Register" / "Open the registration form"
-     button on the page will point to it and open in a new tab.
-     Until you set it, those buttons fall back to WhatsApp.
+     The registration form URL. Every "Register" / "Open the
+     registration form" button on the page points here and opens
+     in a new tab. (It is also hard-coded on the links in
+     index.html so they still work with JavaScript disabled —
+     keep the two in sync.)
      ----------------------------------------------------------- */
-  var REGISTER_URL = ""; // e.g. "https://forms.gle/xxxxxxxx"
+  var REGISTER_URL = "https://forms.gle/biuxaGiAj6wjfLG29";
 
   var registerHref = REGISTER_URL || "https://wa.me/916380873580";
-  document.querySelectorAll("[data-register]").forEach(function (el) {
+  document.querySelectorAll("[data-register], [data-countdown-cta]").forEach(function (el) {
     el.setAttribute("href", registerHref);
     el.setAttribute("target", "_blank");
     el.setAttribute("rel", "noopener");
@@ -78,19 +79,32 @@
       if (e.key === "Escape") closeMenu();
     });
     window.addEventListener("resize", function () {
-      if (window.innerWidth > 880) closeMenu();
+      if (window.innerWidth > 900) closeMenu();
     });
   }
 
   /* -----------------------------------------------------------
      4. Scroll reveal — tag section blocks, observe once
      ----------------------------------------------------------- */
-  var revealTargets = document.querySelectorAll(
-    ".section__title, .section__intro, .card, .learn__item, " +
-    ".outcomes li, .fac, .spec, .factstrip, .stage, " +
-    ".learn__meta, .pathway__foot, .closer__inner, .hero__banner, .countdown__inner"
-  );
-  revealTargets.forEach(function (el) { el.setAttribute("data-reveal", ""); });
+  document.querySelectorAll(
+    ".eyebrow, .section__title, .section__intro, .card, .learn__item, " +
+    ".outcomes li, .fac, .spec, .stage, .program__figure, .pathway__figure, .learn__figure, " +
+    ".learn__meta, .pathway__foot, .closer__inner, .hero__carousel"
+  ).forEach(function (el) { el.setAttribute("data-reveal", ""); });
+
+  // staggered groups — visible direct children reveal one after another
+  document.querySelectorAll("[data-stagger]").forEach(function (group) {
+    var i = 0;
+    Array.prototype.forEach.call(group.children, function (kid) {
+      if (kid.hidden ||
+          kid.classList.contains("visually-hidden") ||
+          getComputedStyle(kid).display === "none") return;
+      kid.style.setProperty("--reveal-delay", (i++ * 65) + "ms");
+      kid.setAttribute("data-reveal", "");
+    });
+  });
+
+  var revealTargets = document.querySelectorAll("[data-reveal]");
 
   function revealNow(el) { el.classList.add("is-visible"); }
 
@@ -256,7 +270,164 @@
   }
 
   /* -----------------------------------------------------------
-     7. Footer year
+     7. Hero banner carousel
+     Slides live in [data-carousel-track]; a slide whose <img>
+     fails to load removes itself, so the carousel adapts to
+     however many banner-*.jpg files actually exist.
+     ----------------------------------------------------------- */
+  document.querySelectorAll("[data-carousel]").forEach(function (root) {
+    var track = root.querySelector("[data-carousel-track]");
+    var dotsWrap = root.querySelector("[data-carousel-dots]");
+    var prevBtn = root.querySelector("[data-carousel-prev]");
+    var nextBtn = root.querySelector("[data-carousel-next]");
+    var toggleBtn = root.querySelector("[data-carousel-toggle]");
+    var INTERVAL = 6000;
+    var index = 0;
+    var timer = null;
+    var playing = !reduceMotion;
+
+    var slides = function () {
+      return Array.prototype.slice.call(track.querySelectorAll(".hero__carousel__slide"));
+    };
+
+    var build = function () {
+      var list = slides();
+
+      // single (or zero) usable slide → static banner, no controls
+      if (list.length < 2) {
+        stop();
+        index = 0;
+        track.style.transform = "translateX(0)";
+        root.setAttribute("data-single", "");
+        dotsWrap.textContent = "";
+        list.forEach(function (s) { s.removeAttribute("aria-hidden"); });
+        return;
+      }
+      root.removeAttribute("data-single");
+
+      dotsWrap.textContent = "";
+      list.forEach(function (slide, i) {
+        slide.setAttribute("role", "group");
+        slide.setAttribute("aria-roledescription", "slide");
+        slide.setAttribute("aria-label", (i + 1) + " of " + list.length);
+
+        var dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "hero__carousel__dot";
+        dot.setAttribute("aria-label", "Show banner " + (i + 1));
+        dot.addEventListener("click", function () { go(i, true); });
+        dotsWrap.appendChild(dot);
+      });
+
+      if (index >= list.length) index = 0;
+      render();
+      if (playing) start();
+    };
+
+    var render = function () {
+      var list = slides();
+      track.style.transform = "translateX(" + (-index * 100) + "%)";
+      list.forEach(function (s, i) { s.setAttribute("aria-hidden", i === index ? "false" : "true"); });
+      Array.prototype.forEach.call(dotsWrap.children, function (d, i) {
+        d.setAttribute("aria-current", i === index ? "true" : "false");
+      });
+    };
+
+    var go = function (i, userAction) {
+      var n = slides().length;
+      if (!n) return;
+      index = ((i % n) + n) % n;
+      render();
+      if (userAction && playing) start();   // reset the timer after a manual move
+    };
+
+    var start = function () {
+      if (reduceMotion) return;
+      stop();
+      timer = window.setInterval(function () { go(index + 1); }, INTERVAL);
+    };
+    var stop = function () { window.clearInterval(timer); timer = null; };
+
+    var setPlaying = function (state) {
+      playing = state;
+      if (toggleBtn) {
+        toggleBtn.setAttribute("aria-pressed", state ? "false" : "true");
+        toggleBtn.setAttribute("aria-label", state ? "Pause banner rotation" : "Resume banner rotation");
+      }
+      state ? start() : stop();
+    };
+
+    if (prevBtn) prevBtn.addEventListener("click", function () { go(index - 1, true); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { go(index + 1, true); });
+    if (toggleBtn) toggleBtn.addEventListener("click", function () { setPlaying(!playing); });
+
+    // pause while hovered / focused, resume after
+    root.addEventListener("pointerenter", stop);
+    root.addEventListener("pointerleave", function () { if (playing) start(); });
+    root.addEventListener("focusin", stop);
+    root.addEventListener("focusout", function () { if (playing) start(); });
+
+    // pause when the tab is hidden or the carousel is scrolled out of view
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stop(); else if (playing) start();
+    });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting && playing) start(); else stop();
+        });
+      }, { threshold: 0.25 }).observe(root);
+    }
+
+    // arrow keys when the carousel has focus
+    root.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { go(index - 1, true); }
+      else if (e.key === "ArrowRight") { go(index + 1, true); }
+    });
+
+    // touch / mouse swipe
+    var down = null;
+    track.addEventListener("pointerdown", function (e) { down = e.clientX; });
+    window.addEventListener("pointerup", function (e) {
+      if (down === null) return;
+      var dx = e.clientX - down;
+      if (Math.abs(dx) > 45) go(index + (dx < 0 ? 1 : -1), true);
+      down = null;
+    });
+
+    // if a slide removes itself after load, rebuild
+    track.addEventListener("error", function () { window.setTimeout(build, 0); }, true);
+
+    build();
+    if (reduceMotion && toggleBtn) toggleBtn.hidden = true;
+  });
+
+  /* -----------------------------------------------------------
+     8. "How it works" illustration — graceful fallback
+     If the image in the markup is missing, look for
+     assets/img/learning/illustration.{svg,png,jpg,jpeg,webp}
+     and use the first that loads. (No requests unless it fails.)
+     ----------------------------------------------------------- */
+  (function () {
+    var img = document.querySelector("[data-learn-illustration]");
+    if (!img) return;
+    function findFallback() {
+      var exts = ["svg", "png", "jpg", "jpeg", "webp"], i = 0;
+      (function probe() {
+        if (i >= exts.length) return;
+        var url = "assets/img/learning/illustration." + exts[i++];
+        var test = new Image();
+        test.onload = function () { img.src = url; };
+        test.onerror = probe;
+        test.src = url;
+      })();
+    }
+    if (img.complete && img.naturalWidth === 0) findFallback();
+    else img.addEventListener("error", findFallback);
+  })();
+
+  /* -----------------------------------------------------------
+     9. Footer year
      ----------------------------------------------------------- */
   var yearEl = document.querySelector("[data-year]");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
