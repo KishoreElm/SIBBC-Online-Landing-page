@@ -19,6 +19,44 @@
 
 <link rel="stylesheet" href="assets/vendor/lenis/lenis.css">
 <link rel="stylesheet" href="assets/css/style.css">
+
+<!-- ===== Meta Pixel =====================================================
+     Put your Pixel ID between the quotes and it activates (PageView on
+     load, "Lead" when the registration form is submitted). Leave it empty
+     and nothing loads. The matching server-side CAPI event is wired in
+     assets/js/main.js — see the README. -->
+<!-- <script>
+  window.META_PIXEL_ID = "";
+  if (window.META_PIXEL_ID) {
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', window.META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
+</script>
+<noscript><img height="1" width="1" style="display:none" alt=""
+  src="https://www.facebook.com/tr?id=0&ev=PageView&noscript=1"></noscript> -->
+  <script>
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () {
+        n.callMethod ?
+        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+      };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+      n.queue = []; t = b.createElement(e); t.async = !0;
+      t.src = v; s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s)
+    }(window, document, 'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1054924470678158');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=1054924470678158&ev=PageView&noscript=1" /></noscript>
+<!-- ===== end Meta Pixel ================================================ -->
 </head>
 <body>
 
@@ -46,7 +84,7 @@
       <a href="#faculty">Faculty</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold nav__cta" data-register>Register</a>
+    <a href="#enrol" class="btn btn--gold nav__cta" data-register>Register</a>
     <button class="nav__toggle" data-menu-toggle aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
@@ -59,7 +97,7 @@
     <a href="#faculty">Faculty</a>
     <a href="#enrol">Enrolment &amp; fees</a>
     <a href="#faq">FAQ</a>
-    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold" data-register>Register now</a>
+    <a href="#enrol" class="btn btn--gold" data-register>Register now</a>
   </div>
 </header>
 
@@ -115,7 +153,7 @@
     </dl>
     <p class="eyebrow eyebrow--onDark">Enrolling now &nbsp;·&nbsp; October 2026 cohort</p>
     <div class="hero__actions">
-      <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold btn--lg" data-register>Register now</a>
+      <a href="#enrol" class="btn btn--gold btn--lg" data-register>Register now</a>
       <a href="#pathway" class="btn btn--ghost btn--lg">See the curriculum</a>
     </div>
   </div>
@@ -173,7 +211,7 @@
     <p class="countdown__done" data-countdown-done hidden>
       The October 2026 cohort has begun. Contact the seminary office about the next intake.
     </p>
-    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold" data-countdown-cta>Register now</a>
+    <a href="#enrol" class="btn btn--gold" data-countdown-cta>Register now</a>
   </div>
 </section>
 
@@ -570,44 +608,146 @@
 
 <!-- ============================ ENROLMENT & FEES ============================ -->
 <section class="section section--paper" id="enrol" aria-labelledby="enrol-title">
-  <div class="wrap wrap--split">
-    <div class="split__lead">
-      <p class="eyebrow">Enrolment</p>
-      <h2 id="enrol-title" class="section__title">Reserve your place</h2>
-      <p class="section__intro">
-        Registration for the October 2026 cohort is open. Complete the form and the seminary
-        office will confirm your place and share the payment schedule.
-      </p>
-      <div class="enrol__actions">
-        <!-- Registration form URL: keep this in sync with REGISTER_URL in assets/js/main.js -->
-        <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold btn--lg" data-register>Open the registration form</a>
-        <a href="https://wa.me/916380873580" class="btn btn--ink btn--lg" target="_blank" rel="noopener">Ask on WhatsApp</a>
-      </div>
-      <p class="enrol__contact">
-        Prefer to talk? Call <a href="tel:+916380873580">63808 73580</a>
-        &nbsp;·&nbsp; <a href="https://sibbcs.online" target="_blank" rel="noopener">sibbcs.online</a>
-      </p>
-    </div>
+  <div class="wrap">
+    <div class="enrol__grid">
+      <div class="enrol__main">
+        <p class="eyebrow">Enrolment</p>
+        <h2 id="enrol-title" class="section__title">Reserve your place</h2>
+        <p class="section__intro">
+          Registration for the October 2026 cohort is open. Fill in the form and the seminary
+          office will confirm your place and share the payment schedule.
+        </p>
 
-    <div class="spec">
-      <p class="spec__head">At a glance</p>
-      <dl class="spec__list" data-stagger>
-        <div><dt>Start date</dt><dd>5 October 2026</dd></div>
-        <div><dt>Duration</dt><dd>6 months · 24 weeks</dd></div>
-        <div><dt>Structure</dt><dd>12 modules · 2 weeks each</dd></div>
-        <div><dt>Live classes</dt><dd>Mon &amp; Fri · 7:30–9:30 PM IST</dd></div>
-        <div><dt>Platform</dt><dd>Zoom · Google Classroom</dd></div>
-        <div><dt>Assessment</dt><dd>None — no exams or grades</dd></div>
-      </dl>
-      <div class="spec__fees">
-        <p class="spec__feesLabel">Fees</p>
-        <p class="spec__feesMain">₹7,800 <span>total tuition</span></p>
-        <p class="spec__feesNote">₹1,300 per month for 6 months · flexible monthly payment available</p>
-        <ul class="spec__feesList">
-          <li>No admission fee</li>
-          <li>No registration fee</li>
-        </ul>
+        <!--
+          NATIVE REGISTRATION FORM
+          Submits straight to the existing Google Form (responses still land in the
+          same spreadsheet) — the action + entry.* IDs are also mirrored in main.js.
+          With JavaScript off it posts normally in a new tab; with JS on it submits
+          in place, shows the thank-you panel, and fires the Meta "Lead" event.
+        -->
+        <form class="regform" id="regform" novalidate
+              action="https://docs.google.com/forms/d/e/1FAIpQLSfF11bzKehgrLVyu4QvvBxGjQDn4qD2D57ncfwTWbmPqixTOA/formResponse"
+              method="post" target="_blank">
+          <div class="regform__row">
+            <div class="regfield">
+              <label for="reg-name">Your name <span class="regfield__req" aria-hidden="true">*</span></label>
+              <input id="reg-name" name="name" type="text" autocomplete="name" required aria-required="true" aria-describedby="reg-name-err">
+              <span class="regfield__err" id="reg-name-err" role="alert" hidden></span>
+            </div>
+            <div class="regfield">
+              <label for="reg-whatsapp">WhatsApp number <span class="regfield__req" aria-hidden="true">*</span></label>
+              <input id="reg-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" required aria-required="true" aria-describedby="reg-whatsapp-err">
+              <span class="regfield__err" id="reg-whatsapp-err" role="alert" hidden></span>
+            </div>
+          </div>
+
+          <div class="regform__row">
+            <div class="regfield">
+              <label for="reg-email">Email address <span class="regfield__req" aria-hidden="true">*</span></label>
+              <input id="reg-email" name="email" type="email" autocomplete="email" required aria-required="true" aria-describedby="reg-email-err">
+              <span class="regfield__err" id="reg-email-err" role="alert" hidden></span>
+            </div>
+            <div class="regfield">
+              <label for="reg-place">Place <span class="regfield__req" aria-hidden="true">*</span></label>
+              <input id="reg-place" name="place" type="text" autocomplete="address-level2" required aria-required="true" aria-describedby="reg-place-err">
+              <span class="regfield__err" id="reg-place-err" role="alert" hidden></span>
+            </div>
+          </div>
+
+          <div class="regform__row">
+            <div class="regfield">
+              <label for="reg-education">Education qualification <span class="regfield__req" aria-hidden="true">*</span></label>
+              <input id="reg-education" name="education" type="text" required aria-required="true" aria-describedby="reg-education-err" placeholder="Secular &amp; theological">
+              <span class="regfield__err" id="reg-education-err" role="alert" hidden></span>
+            </div>
+            <div class="regfield">
+              <label for="reg-profession">Profession <span class="regfield__req" aria-hidden="true">*</span></label>
+              <input id="reg-profession" name="profession" type="text" autocomplete="organization-title" required aria-required="true" aria-describedby="reg-profession-err">
+              <span class="regfield__err" id="reg-profession-err" role="alert" hidden></span>
+            </div>
+          </div>
+
+          <div class="regfield regfield--full">
+            <label for="reg-ministry">Ministry experience, if any <span class="regfield__req" aria-hidden="true">*</span></label>
+            <textarea id="reg-ministry" name="ministry" rows="3" required aria-required="true" aria-describedby="reg-ministry-err"></textarea>
+            <span class="regfield__err" id="reg-ministry-err" role="alert" hidden></span>
+          </div>
+
+          <div class="regfield regfield--full">
+            <label for="reg-source">How did you hear about this program? <span class="regfield__req" aria-hidden="true">*</span></label>
+            <select id="reg-source" name="source" required aria-required="true" aria-describedby="reg-source-err">
+              <option value="">Select one…</option>
+              <option>Website</option>
+              <option>Facebook</option>
+              <option>WhatsApp</option>
+              <option>Friends</option>
+              <option>Other</option>
+            </select>
+            <span class="regfield__err" id="reg-source-err" role="alert" hidden></span>
+          </div>
+
+          <div class="regfield regfield--full" data-source-other hidden>
+            <label for="reg-source-other">Tell us where <span class="regfield__req" aria-hidden="true">*</span></label>
+            <input id="reg-source-other" name="source_other" type="text" aria-describedby="reg-source-other-err">
+            <span class="regfield__err" id="reg-source-other-err" role="alert" hidden></span>
+          </div>
+
+          <label class="regform__consent">
+            <input type="checkbox" id="reg-consent" name="consent" required aria-required="true" aria-describedby="reg-consent-err">
+            <span>I'd like the SIBBC&amp;S office to contact me about this program.</span>
+          </label>
+          <span class="regfield__err" id="reg-consent-err" role="alert" hidden></span>
+
+          <button type="submit" class="btn btn--gold btn--lg regform__submit">
+            <span class="regform__submitText">Send my registration</span>
+          </button>
+
+          <p class="regform__note">
+            No admission or registration fee. Your details go only to the seminary office,
+            to contact you about this program.
+          </p>
+          <p class="regform__status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="regform__done" id="regform-done" hidden tabindex="-1">
+          <svg class="regform__doneIcon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/>
+          </svg>
+          <h3>Thank you — your registration is in</h3>
+          <p>
+            The seminary office will confirm your place and send the payment schedule,
+            usually within two working days. Questions in the meantime?
+            <a href="https://wa.me/916380873580" target="_blank" rel="noopener">Message us on WhatsApp</a>.
+          </p>
+        </div>
       </div>
+
+      <aside class="enrol__aside">
+        <div class="spec">
+          <p class="spec__head">At a glance</p>
+          <dl class="spec__list" data-stagger>
+            <div><dt>Start date</dt><dd>5 October 2026</dd></div>
+            <div><dt>Duration</dt><dd>6 months · 24 weeks</dd></div>
+            <div><dt>Structure</dt><dd>12 modules · 2 weeks each</dd></div>
+            <div><dt>Live classes</dt><dd>Mon &amp; Fri · 7:30–9:30 PM IST</dd></div>
+            <div><dt>Platform</dt><dd>Zoom · Google Classroom</dd></div>
+            <div><dt>Assessment</dt><dd>None — no exams or grades</dd></div>
+          </dl>
+          <div class="spec__fees">
+            <p class="spec__feesLabel">Fees</p>
+            <p class="spec__feesMain">₹7,800 <span>total tuition</span></p>
+            <p class="spec__feesNote">₹1,300 per month for 6 months · flexible monthly payment available</p>
+            <ul class="spec__feesList">
+              <li>No admission fee</li>
+              <li>No registration fee</li>
+            </ul>
+          </div>
+        </div>
+        <p class="enrol__contact">
+          Prefer to talk? Call <a href="tel:+916380873580">63808 73580</a>
+          &nbsp;·&nbsp; <a href="https://sibbcs.online" target="_blank" rel="noopener">sibbcs.online</a>
+        </p>
+      </aside>
     </div>
   </div>
 </section>
@@ -719,7 +859,7 @@
   <div class="wrap wrap--narrow closer__inner">
     <h2 id="closer-title">Begin the October 2026 cohort</h2>
     <p>Six months. Twelve modules. One coherent defence of the faith.</p>
-    <a href="https://forms.gle/biuxaGiAj6wjfLG29" target="_blank" rel="noopener" class="btn btn--gold btn--lg" data-register>Register now</a>
+    <a href="#enrol" class="btn btn--gold btn--lg" data-register>Register now</a>
   </div>
 </section>
 
@@ -746,6 +886,16 @@
     <p>Certificate in Advanced Christian Apologetics</p>
   </div>
 </footer>
+
+<!-- ============================ FLOATING WHATSAPP ============================ -->
+<!-- To change the number, edit the wa.me digits below (country code + number, no +). -->
+<a class="wa-fab" href="https://wa.me/916380873580?text=Hi%2C%20I%20have%20a%20question%20about%20the%20Certificate%20in%20Advanced%20Christian%20Apologetics."
+   target="_blank" rel="noopener" aria-label="Chat with the seminary on WhatsApp">
+  <svg class="wa-fab__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.611-.916-2.207-.242-.58-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/>
+  </svg>
+  <span class="wa-fab__label">Chat with us</span>
+</a>
 
 <script src="assets/vendor/lenis/lenis.min.js" defer></script>
 <script src="assets/js/main.js" defer></script>

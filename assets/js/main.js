@@ -21,21 +21,245 @@
   }
 
   /* -----------------------------------------------------------
-     1. Registration link  —  EDIT THIS ONE LINE
-     The registration form URL. Every "Register" / "Open the
-     registration form" button on the page points here and opens
-     in a new tab. (It is also hard-coded on the links in
-     index.html so they still work with JavaScript disabled —
-     keep the two in sync.)
-     ----------------------------------------------------------- */
-  var REGISTER_URL = "https://forms.gle/biuxaGiAj6wjfLG29";
+     1. Registration — native on-page form (#enrol)
 
-  var registerHref = REGISTER_URL || "https://wa.me/916380873580";
-  document.querySelectorAll("[data-register], [data-countdown-cta]").forEach(function (el) {
-    el.setAttribute("href", registerHref);
-    el.setAttribute("target", "_blank");
-    el.setAttribute("rel", "noopener");
+     Every "Register" button jumps to #enrol. On submit the form:
+       • posts to the existing Google Form, so responses still land
+         in the same spreadsheet (action + entry.* IDs below);
+       • fires the Meta Pixel "Lead" event — needs META_PIXEL_ID in
+         index.html's <head>;
+       • POSTs the same event (shared event_id, for deduplication)
+         to CAPI_ENDPOINT for the server-side Conversions API event.
+         Leave CAPI_ENDPOINT "" until that endpoint exists — see the
+         README for the payload it receives and a sample handler.
+     ----------------------------------------------------------- */
+  var CAPI_ENDPOINT = "";
+
+  var GFORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfF11bzKehgrLVyu4QvvBxGjQDn4qD2D57ncfwTWbmPqixTOA/formResponse";
+  var GFORM_ENTRY = {
+    name:       "entry.1230168326",
+    whatsapp:   "entry.310294248",
+    email:      "entry.1121761539",
+    education:  "entry.1328196783",
+    place:      "entry.300486032",
+    profession: "entry.1399620908",
+    ministry:   "entry.2079524038",
+    source:     "entry.1642796003"
+  };
+  var GFORM_FALLBACK = "https://forms.gle/biuxaGiAj6wjfLG29";
+
+  // "Register" buttons: smooth-scroll to #enrol (Lenis handles the anchor),
+  // then, on non-touch devices, put the cursor in the first field.
+  var canHover = window.matchMedia("(hover: hover)").matches;
+  document.querySelectorAll('[data-register], [data-countdown-cta]').forEach(function (el) {
+    el.addEventListener("click", function () {
+      if (!canHover) return;
+      var first = document.getElementById("reg-name");
+      if (first) window.setTimeout(function () {
+        try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
+      }, 700);
+    });
   });
+
+  (function registrationForm() {
+    var form = document.getElementById("regform");
+    if (!form) return;
+
+    var doneEl    = document.getElementById("regform-done");
+    var statusEl  = form.querySelector(".regform__status");
+    var submitBtn = form.querySelector(".regform__submit");
+    var sourceSel = form.querySelector("#reg-source");
+    var otherWrap = form.querySelector("[data-source-other]");
+    var otherInput = form.querySelector("#reg-source-other");
+    var sending = false;
+
+    form.setAttribute("novalidate", "");   // JS owns validation from here on
+
+    var fieldOf = function (input) { return input.closest(".regfield"); };
+    var boxOf = function (input) {
+      var f = fieldOf(input);
+      return (f && f.querySelector(".regfield__err")) ||
+             document.getElementById(input.getAttribute("aria-describedby"));
+    };
+    var setError = function (input, msg) {
+      var f = fieldOf(input), box = boxOf(input);
+      if (f) f.classList.toggle("is-invalid", !!msg);
+      input.setAttribute("aria-invalid", msg ? "true" : "false");
+      if (box) { box.textContent = msg || ""; box.hidden = !msg; }
+    };
+
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var validate = function (input) {
+      if (input.hidden || (fieldOf(input) && fieldOf(input).hidden)) return true;
+      var val = (input.value || "").trim();
+      var msg = "";
+      if (input.type === "checkbox") {
+        if (input.required && !input.checked) msg = "Please tick this box so we can contact you.";
+      } else if (input.required && !val) {
+        msg = "This field is required.";
+      } else if (input.type === "email" && val && !EMAIL_RE.test(val)) {
+        msg = "Enter a valid email address.";
+      } else if (input.type === "tel" && val && val.replace(/\D/g, "").length < 8) {
+        msg = "Enter a valid number, with country or area code.";
+      }
+      setError(input, msg);
+      return !msg;
+    };
+
+    var fields = Array.prototype.slice.call(
+      form.querySelectorAll("input[name], textarea[name], select[name]")
+    );
+    fields.forEach(function (input) {
+      var evt = (input.tagName === "SELECT" || input.type === "checkbox") ? "change" : "blur";
+      input.addEventListener(evt, function () { validate(input); });
+      input.addEventListener("input", function () {
+        var f = fieldOf(input);
+        if (f && f.classList.contains("is-invalid")) validate(input);
+      });
+    });
+
+    // "Other" free-text box appears only when "Other" is selected
+    var syncOther = function () {
+      var isOther = sourceSel.value === "Other";
+      otherWrap.hidden = !isOther;
+      otherInput.toggleAttribute("required", isOther);
+      if (!isOther) { otherInput.value = ""; setError(otherInput, ""); }
+    };
+    if (sourceSel && otherWrap) {
+      sourceSel.addEventListener("change", syncOther);
+      syncOther();
+    }
+
+    // arrived from a Facebook click-through → pre-pick the source
+    try {
+      if (sourceSel && !sourceSel.value &&
+          new URLSearchParams(location.search).get("fbclid")) {
+        sourceSel.value = "Facebook";
+      }
+    } catch (e) {}
+
+    var uuid = function () {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0;
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      });
+    };
+    var cookie = function (name) {
+      var m = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+      return m ? m.pop() : "";
+    };
+    var fbc = function () {
+      var c = cookie("_fbc");
+      if (c) return c;
+      var id = "";
+      try { id = new URLSearchParams(location.search).get("fbclid") || ""; } catch (e) {}
+      return id ? "fb.1." + Date.now() + "." + id : "";
+    };
+
+    var collect = function () {
+      var g = function (n) { return form.elements[n] ? (form.elements[n].value || "").trim() : ""; };
+      return {
+        name: g("name"), whatsapp: g("whatsapp"), email: g("email"),
+        education: g("education"), place: g("place"), profession: g("profession"),
+        ministry: g("ministry"), source: g("source"), source_other: g("source_other")
+      };
+    };
+
+    var postToGoogle = function (d) {
+      var body = new URLSearchParams();
+      body.append(GFORM_ENTRY.name, d.name);
+      body.append(GFORM_ENTRY.whatsapp, d.whatsapp);
+      body.append(GFORM_ENTRY.email, d.email);
+      body.append(GFORM_ENTRY.education, d.education);
+      body.append(GFORM_ENTRY.place, d.place);
+      body.append(GFORM_ENTRY.profession, d.profession);
+      body.append(GFORM_ENTRY.ministry, d.ministry);
+      if (d.source === "Other") {
+        body.append(GFORM_ENTRY.source, "__other_option__");
+        body.append(GFORM_ENTRY.source + ".other_option_response", d.source_other);
+      } else if (d.source) {
+        body.append(GFORM_ENTRY.source, d.source);
+      }
+      body.append(GFORM_ENTRY.source + "_sentinel", "");
+      body.append("fvv", "1");
+      body.append("pageHistory", "0");
+      body.append("submissionTimestamp", "-1");
+      return fetch(GFORM_ACTION, { method: "POST", mode: "no-cors", body: body });
+    };
+
+    var fireLead = function (d, eventId) {
+      if (window.fbq) {
+        fbq("track", "Lead", {
+          content_name: "Certificate in Advanced Christian Apologetics",
+          content_category: "Course registration"
+        }, { eventID: eventId });
+      }
+      if (CAPI_ENDPOINT) {
+        try {
+          fetch(CAPI_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            keepalive: true,
+            body: JSON.stringify({
+              event_name: "Lead",
+              event_id: eventId,
+              event_source_url: location.href,
+              action_source: "website",
+              fbp: cookie("_fbp") || null,
+              fbc: fbc() || null,
+              user_data: { email: d.email, phone: d.whatsapp, name: d.name },
+              custom_data: {
+                content_name: "Certificate in Advanced Christian Apologetics",
+                lead_source: d.source || "Website"
+              }
+            })
+          }).catch(function () {});
+        } catch (e) {}
+      }
+    };
+
+    var showDone = function () {
+      form.hidden = true;
+      doneEl.hidden = false;
+      try { doneEl.focus(); } catch (e) {}
+      doneEl.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+    };
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (sending) return;
+
+      var firstBad = null;
+      fields.forEach(function (input) {
+        if (!validate(input) && !firstBad) firstBad = input;
+      });
+      if (firstBad) {
+        statusEl.textContent = "Please check the highlighted fields above.";
+        try { firstBad.focus(); } catch (x) {}
+        return;
+      }
+      statusEl.textContent = "";
+
+      var data = collect();
+      var eventId = uuid();
+      sending = true;
+      form.classList.add("is-sending");
+      submitBtn.disabled = true;
+
+      postToGoogle(data).then(function () {
+        fireLead(data, eventId);
+        showDone();
+      }).catch(function () {
+        sending = false;
+        form.classList.remove("is-sending");
+        submitBtn.disabled = false;
+        statusEl.innerHTML =
+          "Something blocked the submission. Please try again — or " +
+          '<a href="' + GFORM_FALLBACK + '" target="_blank" rel="noopener">use the Google&nbsp;Form</a>.';
+      });
+    });
+  })();
 
   /* -----------------------------------------------------------
      2. Sticky nav — shadow after scrolling past the hero top

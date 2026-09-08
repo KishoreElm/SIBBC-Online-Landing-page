@@ -34,14 +34,77 @@ folder (you can leave out `.claude/` and `README.md`).
 
 ## Before you go live
 
-### 1. The registration link
+### 1. The registration form
 
-Every **Register** / **Open the registration form** button points to the Google Form
-`https://forms.gle/biuxaGiAj6wjfLG29` and opens in a new tab.
+Registration is a **native form** in the `#enrol` section. Every **Register** button
+scrolls to it. On submit it:
 
-To change it, update it in **two** places so it also works with JavaScript off:
-1. `REGISTER_URL` near the top of `assets/js/main.js`
-2. every `href="https://forms.gle/…"` in `index.html` (find-and-replace)
+1. **posts to the existing Google Form** — `https://forms.gle/biuxaGiAj6wjfLG29` —
+   so responses still land in the **same Google Sheet** you already use. With
+   JavaScript off, the form posts to Google directly in a new tab (native fallback).
+2. fires the **Meta Pixel `Lead` event** (see §1c).
+3. shows an inline "thank you" panel — no page reload, no redirect.
+
+**If you rebuild the Google Form** (or make your own), update the field map in
+`assets/js/main.js` — `GFORM_ACTION` and `GFORM_ENTRY`. The current mapping:
+
+| Form field | Google `entry.*` |
+|---|---|
+| Your name | `entry.1230168326` |
+| WhatsApp number | `entry.310294248` |
+| Email address | `entry.1121761539` |
+| Education qualification | `entry.1328196783` |
+| Place | `entry.300486032` |
+| Profession | `entry.1399620908` |
+| Ministry experience | `entry.2079524038` |
+| How did you hear? | `entry.1642796003` |
+
+To get the IDs for a new form: open it, View Source, search `entry.` — or open the
+pre-filled-link editor and read them off the URL. Keep the on-page field labels and
+the Google questions in the same order.
+
+### 1c. Meta Pixel & Conversions API (CAPI)
+
+**Pixel (browser side).** Put your Pixel ID in `index.html` — the line
+`window.META_PIXEL_ID = "";` near the top of `<head>`. Set it and the Pixel loads
+(`PageView` on load, `Lead` on a successful registration). Leave it empty and nothing
+Meta-related loads at all.
+
+**CAPI (server side).** The `Lead` also needs to fire server-to-server so Meta can
+optimise on real conversions instead of guessing. That call carries your **access
+token**, which must never sit in the page — it needs a small backend. Set
+`CAPI_ENDPOINT` in `assets/js/main.js` to your endpoint URL and on each submit the
+page will `POST` it this JSON:
+
+```json
+{
+  "event_name": "Lead",
+  "event_id": "<uuid>",                     // SAME id the Pixel used → Meta dedupes
+  "event_source_url": "https://…/#enrol",
+  "action_source": "website",
+  "fbp": "<_fbp cookie or null>",
+  "fbc": "<_fbc cookie / built from fbclid, or null>",
+  "user_data": { "email": "…", "phone": "…", "name": "…" },
+  "custom_data": { "content_name": "Certificate in Advanced Christian Apologetics", "lead_source": "Website" }
+}
+```
+
+Your endpoint must **SHA‑256‑hash** `email` / `phone` / `name` (lower-cased, trimmed;
+phone digits only) and forward to
+`https://graph.facebook.com/v21.0/<PIXEL_ID>/events` with `access_token`,
+`event_time`, `client_ip_address` and `client_user_agent`. Pass `event_id` straight
+through unchanged — that is what pairs it with the browser Pixel event. A minimal
+Google Apps Script or serverless handler is ~30 lines; see Meta's "Conversions API"
+docs for the exact payload.
+
+Until `CAPI_ENDPOINT` is set the page still works — Google Form + browser Pixel only.
+
+### 1b. The WhatsApp number
+
+The **floating WhatsApp button** (bottom-right of every screen) and the "Ask on
+WhatsApp" button both use `wa.me/916380873580` (country code + number, no `+`).
+Search `index.html` for `916380873580` to change it. The floating button also carries
+a pre-filled first message — the `?text=…` part of its link, URL-encoded.
 
 ### 2. Faculty photos and teaching assignments
 
