@@ -746,8 +746,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.
   margin: 0;
   border-radius: var(--r-lg);
   overflow: hidden;
-  border: 1px solid var(--cream-rule);
-  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
+  /* border: 1px solid var(--cream-rule); */
+  /* box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55); */
 }
 .pathway__figure img {
   width: 100%;
