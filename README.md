@@ -189,6 +189,15 @@ No server-side code is required.
   finds, otherwise the placeholder stays. Landscape shape works best.
 - **Curriculum** (the 4-stage "path"): each stage is a `<details>` block inside
   `.spine` in `index.html`. Stage I is open by default (`<details ... open>`).
+- **Testimonials** (`#testimonials`, between "How it works" and "Outcomes"): a stack of cards — the front
+  one flips to the back on the arrows, the dots, a drag-flick, or a 7 s auto-advance
+  (paused on hover / focus / off-screen / hidden tab, and off entirely for
+  reduced-motion visitors). Each testimonial is one `<li class="tcard">` in
+  `index.html`; add or remove cards freely and the stack + dots adapt. **The quotes,
+  names, and roles that ship are placeholders — replace them with real,
+  permission-cleared quotes before going live.** Avatars are the initials in the
+  `<span class="tcard__avatar">`; to use a photo, put an `<img>` inside that span.
+  Pattern adapted from `examples.motion.dev/ui/sections/testimonials-stack`.
 - **FAQ**: each question is a `<details class="faq__item">` in the FAQ section.
 - **Dates, schedule, fees**: search `index.html` for `5 October 2026`,
   `7:30`, and `7,800` — they appear in the hero fact strip, the countdown, and the

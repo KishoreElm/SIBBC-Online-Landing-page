@@ -313,7 +313,7 @@
   document.querySelectorAll(
     ".eyebrow, .section__title, .section__intro, .card, .learn__item, " +
     ".outcomes li, .fac, .spec, .stage, .program__figure, .pathway__figure, .learn__figure, " +
-    ".learn__meta, .pathway__foot, .closer__inner, .hero__carousel"
+    ".learn__meta, .pathway__foot, .closer__inner, .hero__carousel, .tstack, .tstack__nav"
   ).forEach(function (el) { el.setAttribute("data-reveal", ""); });
 
   // staggered groups — visible direct children reveal one after another
@@ -651,7 +651,154 @@
   })();
 
   /* -----------------------------------------------------------
-     9. Footer year
+     9. Testimonials — card stack
+     A deck of overlapping cards; the front one flips to the back
+     on next/prev, drag-flick, dot click, or a 7s auto-advance.
+     Pauses on hover / focus / off-screen / hidden tab, and never
+     auto-advances under prefers-reduced-motion.
+     ----------------------------------------------------------- */
+  (function () {
+    var root = document.querySelector("[data-tstack]");
+    if (!root) return;
+    var wrap = root.querySelector("[data-tstack-cards]");
+    var cards = Array.prototype.slice.call(wrap.querySelectorAll(".tcard"));
+    var n = cards.length;
+    if (!n) return;
+
+    var nav = document.querySelector("[data-tstack-nav]");
+    var prevBtn = nav && nav.querySelector("[data-tstack-prev]");
+    var nextBtn = nav && nav.querySelector("[data-tstack-next]");
+    var dotsWrap = nav && nav.querySelector("[data-tstack-dots]");
+    var live = root.querySelector("[data-tstack-live]");
+    var INTERVAL = 7000;
+    var active = 0, dir = 1, timer = null;
+    var playing = !reduceMotion && n > 1;
+
+    if (nav && n < 2) nav.hidden = true;
+
+    var dots = [];
+    if (dotsWrap && n > 1) {
+      cards.forEach(function (c, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "tstack__dot";
+        b.setAttribute("role", "tab");
+        b.setAttribute("aria-label", "Testimonial " + (i + 1));
+        b.addEventListener("click", function () { go(i - active, true); });
+        dotsWrap.appendChild(b);
+        dots.push(b);
+      });
+    }
+
+    var textOf = function (el, sel) {
+      var t = el.querySelector(sel);
+      return t ? t.textContent.replace(/\s+/g, " ").trim() : "";
+    };
+
+    var sizeStack = function () {
+      if (root.clientWidth < 240) return;          // degenerate layout — leave the CSS fallback
+      var h = 0;
+      for (var i = 0; i < n; i++) h = Math.max(h, cards[i].scrollHeight);
+      if (h >= 200 && h <= 640) root.style.minHeight = Math.ceil(h + 44) + "px";  // headroom for the peeking cards
+    };
+
+    var render = function () {
+      cards.forEach(function (card, i) {
+        var order = (i - active + n) % n, t, o, z;
+        if (order === 0) {
+          t = ""; o = "1"; z = n + 2;
+          card.classList.add("tcard--front");
+          card.setAttribute("aria-hidden", "false");
+        } else {
+          card.classList.remove("tcard--front");
+          card.setAttribute("aria-hidden", "true");
+          if (order === 1) { t = "translateY(26px) scale(0.955) rotate(-2.5deg)"; o = "0.7"; z = n; }
+          else if (order === 2) { t = "translateY(50px) scale(0.912) rotate(3deg)"; o = "0.4"; z = n - 1; }
+          else if (order === n - 1) {
+            t = "translateX(" + (dir > 0 ? "-24%" : "24%") + ") translateY(30px) scale(0.92) rotate(" +
+                (dir > 0 ? "-12deg" : "12deg") + ")";
+            o = "0"; z = 1;
+          } else { t = "translateY(66px) scale(0.87)"; o = "0"; z = 2; }
+        }
+        card.style.transform = t;
+        card.style.opacity = o;
+        card.style.zIndex = z;
+      });
+      dots.forEach(function (d, i) { d.setAttribute("aria-current", i === active ? "true" : "false"); });
+      if (live) {
+        live.textContent = "Testimonial " + (active + 1) + " of " + n + " — " +
+          textOf(cards[active], ".tcard__name") + ", " + textOf(cards[active], ".tcard__role");
+      }
+    };
+
+    function go(step, userAction) {
+      if (n < 2 || !step) return;
+      dir = step > 0 ? 1 : -1;
+      active = ((active + step) % n + n) % n;
+      render();
+      if (userAction) restart();
+    }
+    function start() { if (playing) { stop(); timer = window.setInterval(function () { go(1); }, INTERVAL); } }
+    function stop() { window.clearInterval(timer); timer = null; }
+    function restart() { stop(); start(); }
+
+    if (prevBtn) prevBtn.addEventListener("click", function () { go(-1, true); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { go(1, true); });
+
+    root.addEventListener("pointerenter", stop);
+    root.addEventListener("pointerleave", restart);
+    root.addEventListener("focusin", stop);
+    root.addEventListener("focusout", restart);
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stop(); else restart();
+    });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) restart(); else stop(); });
+      }, { threshold: 0.3 }).observe(root);
+    }
+
+    root.setAttribute("tabindex", "0");
+    root.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(-1, true); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); go(1, true); }
+    });
+
+    // drag / flick the front card
+    var startX = null, drag = null;
+    root.addEventListener("pointerdown", function (e) {
+      var front = cards[active];
+      if (n < 2 || !front.contains(e.target)) return;
+      startX = e.clientX;
+      drag = front;
+      front.classList.add("is-dragging");
+      stop();
+    });
+    window.addEventListener("pointermove", function (e) {
+      if (startX === null) return;
+      var dx = e.clientX - startX;
+      drag.style.transform = "translateX(" + dx + "px) rotate(" + (dx * 0.03).toFixed(2) + "deg)";
+    });
+    window.addEventListener("pointerup", function (e) {
+      if (startX === null) return;
+      var dx = e.clientX - startX;
+      drag.classList.remove("is-dragging");
+      drag = null; startX = null;
+      if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1, true);
+      else { render(); restart(); }
+    });
+
+    window.addEventListener("resize", sizeStack);
+    window.addEventListener("load", sizeStack);
+
+    render();
+    sizeStack();
+    window.setTimeout(sizeStack, 400);   // after webfonts settle
+    start();
+  })();
+
+  /* -----------------------------------------------------------
+     10. Footer year
      ----------------------------------------------------------- */
   var yearEl = document.querySelector("[data-year]");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
